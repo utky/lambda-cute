@@ -3,6 +3,12 @@ module Language.Lambda.Syntax where
 
 import Data.Maybe (fromMaybe)
 
+{- | Lambda syntax
+ - t ::=
+ -   x
+ -   λx. t
+ -   x x
+ -}
 data T where
   Var :: String -> T
   Abs :: String -> T -> T
@@ -25,8 +31,14 @@ lookup' s ((s', t'):cs)
   | s == s' = Just t'
   | otherwise = lookup' s cs
 
+reduce :: Context -> T -> T
+reduce c (Var v)               = fromMaybe (Var v) (lookup v c)
+reduce c (App t1 t2@(App _ _)) = App t1 (reduce c t2) -- call by value
+reduce c (App (Abs v t1) t2)   = reduce (insert' v t2 c) t1 -- beta reduction
+reduce c t = t
+
 eval :: Context -> T -> V
-eval c (Var name) = fromMaybe (Abs' name (Var name)) (fmap (eval c) (lookup' name c))
-eval c (App (Abs s t) t2) = eval (insert' s t2 c) t
-eval c (Abs name t) = eval c t
+eval c (Var v) = Abs' v (Var v)
+eval c (Abs v t) = Abs' v t
+eval c t = eval c (reduce c t)
 
