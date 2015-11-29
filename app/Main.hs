@@ -1,6 +1,13 @@
 module Main where
 
-import Lib
+import Language.Lambda
+import System.IO (interact)
 
 main :: IO ()
-main = someFunc
+main = interact process
+
+process :: String -> String
+process = 
+  let evalR  = fmap (eval empty')
+  in handleError . evalR . runLambdaParser
+
