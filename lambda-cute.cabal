@@ -36,6 +36,8 @@ test-suite lambda-cute-test
   main-is:             Spec.hs
   build-depends:       base
                      , lambda-cute
+                     , hspec
+                     , QuickCheck
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 

@@ -8,6 +8,7 @@ import Language.Lambda.Syntax
 import Data.Either (either)
 
 
+
 handleError :: (Show a) => Either ParseError a -> String
 handleError (Left e) = foldMap showMessage (errorMessages e)
 handleError (Right v) = show v
@@ -25,26 +26,26 @@ parser :: Parser Term
 parser = term
 
 term :: Parser Term
-term = var <|> abs' <|> app
+term =
+  let t = abs' <|> var <|> app
+  in between (char '(') (char ')') t  <|> t
 
-symbol :: Parser String
-symbol = many alphaNum
+
+identifier :: Parser String
+identifier = many1 alphaNum
 
 var :: Parser Term
-var = Var <$> symbol
+var = Var <$> identifier
 
 abs' :: Parser Term
-abs' = Abs <$> symbol <*> term
+abs' = Abs <$> (between lambda dot identifier) <*> (spaces *> term)
 
 app :: Parser Term
-app = App <$> abs' <*> term
+app = App <$> (term <* spaces) <*> term
 
 lambda :: Parser Char
 lambda = char 'λ'
 
 dot :: Parser Char
 dot = char '.'
-
-space :: Parser Char
-space = char ' '
 
